@@ -15,10 +15,10 @@ typedef struct DynamicPerfectHashTable {
     PHT** tables;
 } DPHT;
 
-void insert_dph();
-char* search_dph();
-void delete_entry_dph();
-int lookup_dph(); // contains
-DPHT* resize_dph();
-void delete_table_dph();
-int update_dph();
+void insert_dpht();
+char* search_dpht();
+void delete_entry_dpht();
+int lookup_dpht(); // contains
+DPHT* resize_dpht();
+void delete_table_dpht();
+int update_dpht();
