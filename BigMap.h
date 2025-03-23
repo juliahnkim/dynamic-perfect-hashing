@@ -57,6 +57,10 @@ void insert_dpht(DPHT* ht, char* key, char* value){
 	if(newPair==NULL){
 		return;
 	}
+
+	if(ht->size+1>ht->capacity*30){
+		resize_dpht(ht);
+	}
 	newPair->key=(char*)malloc(strlen(key)*sizeof(char)+1);
 	newPair->value=(char*)malloc(strlen(value) * sizeof(char)+1);
 	strncpy(newPair->key, key, strlen(key)); 
@@ -65,6 +69,7 @@ void insert_dpht(DPHT* ht, char* key, char* value){
     	newPair->value[strlen(value)] = '\0';
 	
 	insert_pht(ht->tables[index], newPair);
+	ht->size+=1;
 	if(ht->tables[index]->size > ht->largestPH){
 		ht->largestPH=ht->tables[index]->size
 	}
@@ -86,7 +91,7 @@ int lookup_dpht(PHT* ht, char* key){
 	return lookup_pht(ht->tables[index], key);
 }
 
-DPHT* resize_dpht(DPHT* ht){
+void resize_dpht(DPHT* ht){
 	PHT** tempArray= (PHT**)malloc(sizeof(PHT*)*ht->capacity*3);
 	int i;
 	int j;
