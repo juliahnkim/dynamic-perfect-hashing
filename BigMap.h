@@ -49,12 +49,12 @@ DPHT* create_dpht(int buckets){
 }
 
 void insert_dpht(DPHT* ht, char* key, char* value){
-	if(ht=NULL){
+	if(ht==NULL){
 		return;
 	}
 	size_t index = _ht_index_find(ht, key);
 	pair_t* newPair= (pair_t*)malloc(sizeof(pair_t));
-	if(newPair=NULL){
+	if(newPair==NULL){
 		return;
 	}
 	newPair->key=(char*)malloc(strlen(key)*sizeof(char)+1);
@@ -86,7 +86,46 @@ int lookup_dpht(PHT* ht, char* key){
 	return lookup_pht(ht->tables[index], key);
 }
 
-DPHT* resize_dpht();
+DPHT* resize_dpht(DPHT* ht){
+	PHT** tempArray= (PHT**)malloc(sizeof(PHT*)*ht->capacity*3);
+	int i;
+	int j;
+	for(i=0; i<ht->capacity*3; i++){
+		tempArray[i]->elements=(pair_t**)malloc(sizeof(pair_t*)*ht->largestPH);
+		tempArray[i]->size=0;
+	}
+	int prev_cap= ht->capacity;
+	ht->capacity=ht->capacity*3;
+	size_t index;
+	for(i=0; i<prev_cap; i++){
+		for(j=0; j<ht->tables[i]->capacity;j++){
+			if(ht->tables[i]->elements[j]==NULL){
+				continue;
+			}
+			index = _ht_index_find(ht, ht->tables[i]->elements[j]->key);
+			tempArray[index]->elements[tempArray[index]->size]=ht->tables[i]->elements[j];
+			tempArray[index]->size+=1;
+		}
+	}
+	for(i=0; i<prev_cap; i++){
+		delete_table_pht(ht->tables[i]);
+	}
+	ht->tables=(PHT**)malloc(sizeof(PHT*)*capacity;
+	for(i=0; i<ht->capacity; i++){
+		ht->tables[i] = pht_create_from_array(tempArray[i], ht->largestPH);
+	}
+
+	for(i=0; i<ht->capacity; i++){
+		delete_table_pht(tempArray[i]);
+	}
+	free(tempArray);
+	ht->largestPH=ht->tables[0]->size;
+	for(i=0; i<ht->capacity; i++){
+		if(ht->tables[i]->size>ht->largestPH){
+			ht->largestPH=ht->tables[i]->size;
+		}
+	}
+}
 
 void delete_table_dpht(DPHT* ht){
 	int i;
