@@ -202,7 +202,7 @@ void pht_delete_entry(PHT* pht, const char* key) {
     }
 }
 
-void pht_delete_table(PHT* pht) {
+void pht_delete(PHT* pht) {
     if (!pht) {
         return; // Nothing to delete
     }
