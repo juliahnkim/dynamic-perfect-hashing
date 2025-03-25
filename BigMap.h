@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "PHT.h"
+#include "pair.h"
 
 typedef size_t (*hash_t)(void*, size_t);
 
