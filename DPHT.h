@@ -71,3 +71,5 @@ void resize_dpht(DPHT* ht);
 void delete_table_dpht(DPHT* ht);
 
 int update_dpht(DPHT* ht, char* key, char* value);
+
+#endif DPHT_H
