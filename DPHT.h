@@ -1,3 +1,6 @@
+#ifndef DPHT_H
+#define DPHT_H
+
 #include <stdlib.h>
 #include <string.h>
 #include "PHT.h"
