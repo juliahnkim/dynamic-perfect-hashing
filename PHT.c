@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#define PHT_DEFAULT_CAPACITY 4
+
 /** Rebuilds the MPH for the current set of keys in the PHT, using CMPH.
  *
  * This function is reorders the entries array so that cmph_search() returns
@@ -85,6 +87,10 @@ static void pht_rebuild(PHT* pht) {
 }
 
 PHT* pht_create(int initial_capacity) {
+    if (initial_capacity < 1) {
+        initial_capacity = PHT_DEFAULT_CAPACITY;
+    }
+
     PHT* pht = (PHT*)malloc(sizeof(PHT));
     if (!pht) {
         return NULL; // Memory allocation failed
@@ -93,7 +99,7 @@ PHT* pht_create(int initial_capacity) {
     // Initialize the PHT with the given initial capacity and default values
     pht->capacity = initial_capacity;
     pht->size = 0;
-    pht->entries = (pair_t**)malloc(sizeof(pair_t*) * initial_capacity);
+    pht->entries = (pair_t**)calloc(initial_capacity, sizeof(pair_t*));
     if (!pht->entries) {
         free(pht);
         return NULL; // Memory allocation failed
