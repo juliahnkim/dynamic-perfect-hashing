@@ -90,7 +90,7 @@ void resize_dpht(DPHT* ht){
 	int i;
 	int j;
 	for(i=0; i<ht->capacity*3; i++){
-		tempArray[i]->elements=(pair_t**)malloc(sizeof(pair_t*)*ht->largestPH);
+		tempArray[i]->entries=(pair_t**)malloc(sizeof(pair_t*)*ht->largestPH);
 		tempArray[i]->size=0;
 	}
 	int prev_cap= ht->capacity;
@@ -98,11 +98,11 @@ void resize_dpht(DPHT* ht){
 	size_t index;
 	for(i=0; i<prev_cap; i++){
 		for(j=0; j<ht->tables[i]->capacity;j++){
-			if(ht->tables[i]->elements[j]==NULL){
+			if(ht->tables[i]->entries[j]==NULL){
 				continue;
 			}
-			index = _ht_index_find(ht, ht->tables[i]->elements[j]->key);
-			tempArray[index]->elements[tempArray[index]->size]=ht->tables[i]->elements[j];
+			index = _ht_index_find(ht, ht->tables[i]->entries[j]->key);
+			tempArray[index]->entries[tempArray[index]->size]=ht->tables[i]->entries[j];
 			tempArray[index]->size+=1;
 		}
 	}
