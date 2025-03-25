@@ -30,7 +30,23 @@ size_t _ht_default_hash(void* raw_key, size_t key_size);
  * returns: the hash value in a size_t
  */
 
+/** Function to get the index of a key
+ *
+ * This function generates a index from the key passed to it.
+ * param: ht the pointer to the hashtable
+ * param: key the string that is the key
+ * returns: the index in a size_t
+ */
+
 size_t _ht_index_find(DPHT* ht, void* key);
+
+/** Function to get the index of a key
+ *
+ * This function generates a index from the key passed to it.
+ * \param ht The pointer to the hashtable
+ * \param key The string that is the key
+ * \returns The index in a size_t
+ */
 
 typedef struct DynamicPerfectHashTable {
     int size;
