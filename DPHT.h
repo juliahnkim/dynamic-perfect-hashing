@@ -58,17 +58,63 @@ typedef struct DynamicPerfectHashTable {
 
 DPHT* create_dpht(int buckets);
 
-void insert_dpht(DPHT* ht, char* key, char* value);
+/** Function to insert a key-value pair into a DPHT
+ *
+ * \param ht the pointer to the DPHT
+ * \param key The string that is the key
+ * \param value The key that is the value
+ * \returns an integer indicating success or failure
+ */
+
+int insert_dpht(DPHT* ht, char* key, char* value);
+
+/** Function to search for the value associated with a key
+ *
+ * \param ht the pointer to the DPHT
+ * \param key The string that is the key
+ * \returns a string that is the value associated with the key
+ */
 
 char* search_dpht(DPHT* ht, char* key);
 
+/** Function to delete a key-value pair from a DPHT
+ *
+ * \param ht the pointer to the DPHT
+ * \param key The string that is the key
+ */
+
 void delete_entry_dpht(DPHT* ht, char* key);
+
+/** Function to check if a key is in the table
+ *
+ * \param ht the pointer to the DPHT
+ * \param key The string that is the key
+ * \returns an int representing if the key is present
+ */
 
 int lookup_dpht(PHT* ht, char* key);
 
+/** Function to resize a DPHT
+ *
+ * \param ht the pointer to the DPHT
+ */
+
 void resize_dpht(DPHT* ht);
 
+/** Function to delete a DPHT
+ *
+ * \param ht the pointer to the DPHT
+ */
+
 void delete_table_dpht(DPHT* ht);
+
+/** Function to update a key-value pair in a DPHT
+ *
+ * \param ht the pointer to the DPHT
+ * \param key The string that is the key
+ * \param value The key that is the value
+ * \returns an integer indicating success or failure
+ */
 
 int update_dpht(DPHT* ht, char* key, char* value);
 
