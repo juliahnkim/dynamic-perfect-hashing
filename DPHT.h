@@ -6,7 +6,19 @@
 #include "PHT.h"
 #include "pair.h"
 
+/** Typedef for the hashfunction pointer
+* this allows the function to be more easily called later
+ */
+
 typedef size_t (*hash_t)(void*, size_t);
+
+/** Hash function for the upper level of the DPHT
+ *
+ * This function generates a hash value from the key passed to it.
+ * param: raw_key which is the string being hashed
+ * param: key_size which is the length of the string
+ * returns: the hash value in a size_t
+ */
 
 size_t _ht_default_hash(void* raw_key, size_t key_size);
 
