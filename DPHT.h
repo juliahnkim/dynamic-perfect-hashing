@@ -15,37 +15,30 @@ typedef size_t (*hash_t)(void*, size_t);
 /** Hash function for the upper level of the DPHT
  *
  * This function generates a hash value from the key passed to it.
- * param: raw_key which is the string being hashed
- * param: key_size which is the length of the string
- * returns: the hash value in a size_t
+ * \param raw_key The string being hashed
+ * \param key_size The length of the string
+ * \returns The hash value in a size_t
  */
 
 size_t _ht_default_hash(void* raw_key, size_t key_size);
 
-/** Hash function for the upper level of the DPHT
- *
- * This function generates a hash value from the key passed to it.
- * param: raw_key which is the string being hashed
- * param: key_size which is the length of the string
- * returns: the hash value in a size_t
- */
-
 /** Function to get the index of a key
  *
  * This function generates a index from the key passed to it.
- * param: ht the pointer to the hashtable
- * param: key the string that is the key
- * returns: the index in a size_t
+ * \param ht the pointer to the hashtable
+ * \param key the string that is the key
+ * \returns the index in a size_t
  */
 
 size_t _ht_index_find(DPHT* ht, void* key);
 
-/** Function to get the index of a key
+/** Struct of the DPHT
  *
- * This function generates a index from the key passed to it.
- * \param ht The pointer to the hashtable
- * \param key The string that is the key
- * \returns The index in a size_t
+ * \param size the integer representing the number of elements in the table
+ * \param capacity the size of the PHT* array
+ * \param largestPH the integer size of the largest PHT table
+ * \param hashFunction the pointer to the hash function in use
+ * \param tables the array of PHT pointers
  */
 
 typedef struct DynamicPerfectHashTable {
@@ -55,6 +48,13 @@ typedef struct DynamicPerfectHashTable {
     hash_t hashFunction;
     PHT** tables;
 } DPHT;
+
+/** Function to create a DPHT
+ *
+ * This function creates a DPHT
+ * \param buckets the size of the array to be created
+ * \returns the pointer to the DPHT created by the function
+ */
 
 DPHT* create_dpht(int buckets);
 
