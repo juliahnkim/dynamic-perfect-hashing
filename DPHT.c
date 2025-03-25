@@ -47,7 +47,7 @@ DPHT* create_dpht(int buckets){
 	}
 }
 
-void insert_dpht(DPHT* ht, char* key, char* value){
+int insert_dpht(DPHT* ht, char* key, char* value){
 	if(ht==NULL){
 		return;
 	}
@@ -60,12 +60,13 @@ void insert_dpht(DPHT* ht, char* key, char* value){
 	if(ht->size+1>ht->capacity*100){
 		resize_dpht(ht);
 	}
-	
-	pht_insert(ht->tables[index], newPair);
+	int ret_val;
+	ret_val=pht_insert(ht->tables[index], newPair);
 	ht->size+=1;
 	if(ht->tables[index]->size > ht->largestPH){
 		ht->largestPH=ht->tables[index]->size
 	}
+	return ret_val;
 	
 }
 
