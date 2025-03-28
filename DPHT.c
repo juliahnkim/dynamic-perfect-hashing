@@ -27,14 +27,6 @@ size_t _ht_index_find(DPHT* ht, void* key){
 	return index;
 }
 
-typedef struct DynamicPerfectHashTable {
-    int size;
-    int capacity;
-    int largestPH;
-    hash_t hashFunction;
-    PHT** tables;
-} DPHT;
-
 DPHT* create_dpht(int buckets){
 	DPHT* dpht = (DPHT*)malloc(sizeof(DPHT));
 	dpht->size=0;
@@ -42,29 +34,34 @@ DPHT* create_dpht(int buckets){
 	dpht->largestPH=0;
 	dpht->hashFunction=&_ht_default_hash;
 	dpht->tables=(PHT**)malloc(sizeof(PHT*)*buckets);
-	for(i=0; i<buckets; i++){
+	for(int i=0; i<buckets; i++){
 		dpht->tables[i]=pht_create(4);
-	}
+    }
+    return dpht;
 }
 
 int insert_dpht(DPHT* ht, char* key, char* value){
 	if(ht==NULL){
-		return;
+		return 0;
 	}
 	size_t index = _ht_index_find(ht, key);
 	pair_t* newPair=pair_create(key, value);
 	if(newPair==NULL){
-		return;
+		return 0;
 	}
 
 	if(ht->size+1>ht->capacity*100){
 		resize_dpht(ht);
 	}
 	int ret_val;
-	ret_val=pht_insert(ht->tables[index], newPair);
-	ht->size+=1;
+    ret_val = pht_insert(ht->tables[index], newPair);
+    
+    if (ret_val == 0) {
+        pair_free(newPair);
+        return 0;
+    }
 	if(ht->tables[index]->size > ht->largestPH){
-		ht->largestPH=ht->tables[index]->size
+        ht->largestPH = ht->tables[index]->size;
 	}
 	return ret_val;
 	
@@ -77,10 +74,10 @@ char* search_dpht(DPHT* ht, char* key){
 
 void delete_entry_dpht(DPHT* ht, char* key){
 	size_t index = _ht_index_find(ht, key);
-	return pht_delete_entry(ht->tables[index], key);
+    pht_delete_entry(ht->tables[index], key);
 }
 
-int lookup_dpht(PHT* ht, char* key){
+int lookup_dpht(DPHT* ht, char* key){
 	size_t index = _ht_index_find(ht, key);
 	return pht_lookup(ht->tables[index], key);
 }
@@ -89,10 +86,9 @@ void resize_dpht(DPHT* ht){
 	PHT** tempArray= (PHT**)malloc(sizeof(PHT*)*ht->capacity*3);
 	int i;
 	int j;
-	for(i=0; i<ht->capacity*3; i++){
-		tempArray[i]->entries=(pair_t**)malloc(sizeof(pair_t*)*ht->largestPH);
-		tempArray[i]->size=0;
-	}
+    for (i = 0; i < ht->capacity * 3; i++) {
+        tempArray[i] = pht_create(ht->largestPH);
+    }
 	int prev_cap= ht->capacity;
 	ht->capacity=ht->capacity*3;
 	size_t index;
@@ -108,8 +104,9 @@ void resize_dpht(DPHT* ht){
 	}
 	for(i=0; i<prev_cap; i++){
 		pht_delete(ht->tables[i]);
-	}
-	ht->tables=(PHT**)malloc(sizeof(PHT*)*capacity;
+    }
+    free(ht->tables);
+    ht->tables = (PHT**)malloc(sizeof(PHT*) * ht->capacity);
 	for(i=0; i<ht->capacity; i++){
 		ht->tables[i] = pht_create_from_array(tempArray[i], ht->largestPH);
 	}
@@ -129,13 +126,12 @@ void resize_dpht(DPHT* ht){
 void delete_table_dpht(DPHT* ht){
 	int i;
 	for(i=0; i<ht->capacity; i++){
-		delete_table_pht(ht->tables[i]);
+		pht_delete(ht->tables[i]);
 	}
 	free(ht);
 }
 
 int update_dpht(DPHT* ht, char* key, char* value){
 	size_t index = _ht_index_find(ht, key);
-	return pht_update(ht->tables[index], key);
-
+	return pht_update(ht->tables[index], key, value);
 }

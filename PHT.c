@@ -27,8 +27,8 @@ static void pht_rebuild(PHT* pht) {
     }
 
     // Allocate an array of keys from the current entries
-    // CMPH vector adapter requires a constant array of strings
-    const char** keys = (const char**)malloc(sizeof(char*) * pht->size);
+    // CMPH vector adapter requires an array of strings
+    char** keys = (char**)malloc(sizeof(char*) * pht->size);
     if (!keys) {
         return; // Memory allocation failed
     }
@@ -199,7 +199,7 @@ void pht_delete_entry(PHT* pht, const char* key) {
     unsigned int hash = cmph_search(pht->mph, key, (cmph_uint32)strlen(key));
     pair_t* entry = pht->entries[hash];
     if (entry && strcmp(entry->key, key) == 0) {
-        free_pair(entry);
+        pair_free(entry);
         // Replace the deleted element with the last element
         // because all entries are stored in a contiguous array
         pht->entries[hash] = pht->entries[pht->size - 1];
@@ -215,7 +215,7 @@ void pht_delete(PHT* pht) {
     // Free all entries
     for (int i = 0; i < pht->size; i++) {
         if (pht->entries[i]) {
-            free_pair(pht->entries[i]);
+            pair_free(pht->entries[i]);
         }
     }
     free(pht->entries); // Free the entries array
@@ -238,7 +238,7 @@ PHT* pht_create_from_array(PHT* source, int new_capacity) {
     for (int i = 0; i < source->size; i++) {
         pair_t* entry = source->entries[i];
         if (!pht_insert(new_pht, entry)) {
-            pht_delete_table(new_pht);  // Free the new PHT if insertion fails
+            pht_delete(new_pht);  // Free the new PHT if insertion fails
             return NULL; // Memory allocation for entries array failed
         }
     }

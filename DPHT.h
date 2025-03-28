@@ -6,6 +6,8 @@
 #include "PHT.h"
 #include "pair.h"
 
+typedef struct DynamicPerfectHashTable DPHT;
+
 /** Typedef for the hashfunction pointer
 * this allows the function to be more easily called later
  */
@@ -40,7 +42,6 @@ size_t _ht_index_find(DPHT* ht, void* key);
  * \param hashFunction the pointer to the hash function in use
  * \param tables the array of PHT pointers
  */
-
 typedef struct DynamicPerfectHashTable {
     int size;
     int capacity;
@@ -92,7 +93,7 @@ void delete_entry_dpht(DPHT* ht, char* key);
  * \returns an int representing if the key is present
  */
 
-int lookup_dpht(PHT* ht, char* key);
+int lookup_dpht(DPHT* ht, char* key);
 
 /** Function to resize a DPHT
  *
@@ -118,4 +119,4 @@ void delete_table_dpht(DPHT* ht);
 
 int update_dpht(DPHT* ht, char* key, char* value);
 
-#endif DPHT_H
+#endif // DPHT_H
