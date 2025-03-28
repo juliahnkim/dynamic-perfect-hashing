@@ -1,7 +1,7 @@
 #ifndef PHT_H
 #define PHT_H
 
-#include <cmph.h>
+#include "cmph.h"
 #include "pair.h"
 
 /** Structure for the small perfect hash table (bucket) that uses CMPH.
@@ -91,4 +91,4 @@ void pht_delete(PHT* pht);
 */
 PHT* pht_create_from_array(PHT* source, int new_capacity);
 
-#endif PHT_H
+#endif // PHT_H
