@@ -92,7 +92,7 @@ void delete_entry_dpht(DPHT* ht, char* key);
  * \returns an int representing if the key is present
  */
 
-int lookup_dpht(PHT* ht, char* key);
+int lookup_dpht(DPHT* ht, char* key);
 
 /** Function to resize a DPHT
  *
