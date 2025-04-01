@@ -18,7 +18,8 @@ static void pht_rebuild(PHT* pht) {
         return; // Invalid PHT
     }
 
-    if (pht->size == 0) { // No entries to rebuild
+    // For a single entry or empty table, skip rebuilding
+    if (pht->size <= 1) {
         if (pht->mph) { // Free the MPH if it exists
             cmph_destroy(pht->mph);
             pht->mph = NULL;
@@ -78,6 +79,7 @@ static void pht_rebuild(PHT* pht) {
 
     free(pht->entries); // Free the old entries array
     pht->entries = new_entries; // Assign the new entries array
+    pht->capacity = pht->size; // Update the capacity to the current size
 
     // Replace the old MPH (if it exists) with the new one
     if (pht->mph) {
@@ -100,14 +102,18 @@ PHT* pht_create(int initial_capacity) {
     pht->capacity = initial_capacity;
     pht->size = 0;
     pht->entries = (pair_t**)calloc(initial_capacity, sizeof(pair_t*));
+
     if (!pht->entries) {
         free(pht);
         return NULL; // Memory allocation failed
     }
+
+    // Initialize the entries array to NULL
     for (int i = 0; i < initial_capacity; i++) {
         pht->entries[i] = NULL;
     }
-    pht->mph = NULL;
+    
+    pht->mph = NULL; // Initialize the MPH to NULL
 
     return pht;
 }
@@ -161,8 +167,17 @@ int pht_insert(PHT* pht, pair_t* new_pair) {
 }
 
 char* pht_search(PHT* pht, const char* key) {
-    if (!pht || !key || pht->size == 0 || !pht->mph) {
+    if (!pht || !key || pht->size == 0) {
         return NULL; // Invalid PHT or key
+    }
+
+    // If there's only one element, return its value if the key matches.
+    if (pht->size == 1) {
+        return pht->entries[0]->value;
+    }
+
+    if (!pht->mph) {
+        return NULL; // No MPH available
     }
 
     unsigned int hash = cmph_search(pht->mph, key, (cmph_uint32)strlen(key));
@@ -193,8 +208,25 @@ int pht_update(PHT* pht, const char* key, const char* new_value) {
 }
 
 void pht_delete_entry(PHT* pht, const char* key) {
-    if (!pht || !key || pht->size == 0 || !pht->mph) {
+    if (!pht || !key || pht->size == 0) {
         return; // Invalid parameters
+    }
+    // If there's only one element, delete the only entry and free the MPH
+    if (pht->size == 1) {
+        if (strcmp(pht->entries[0]->key, key) == 0) {
+            pair_free(pht->entries[0]);
+            pht->entries[0] = NULL;
+            pht->size = 0;
+            if (pht->mph) {
+                cmph_destroy(pht->mph);
+                pht->mph = NULL;
+            }
+        }
+        return;
+    }
+    // For 2 or more elements, use the MPH to find the key
+    if (!pht->mph) {
+        return; // No MPH available
     }
     unsigned int hash = cmph_search(pht->mph, key, (cmph_uint32)strlen(key));
     pair_t* entry = pht->entries[hash];
@@ -232,13 +264,20 @@ PHT* pht_create_from_array(PHT* source, int new_capacity) {
     // Create a new PHT with the specified capacity
     PHT* new_pht = pht_create(new_capacity);
     if (!new_pht) {
-        return NULL; // Memory allocation failed
+        return NULL; // Memory allocation failed for new PHT
     }
-    // Copy entries from the source PHT to the new PHT
+    // Copy (duplicate) entries from the source PHT to the new PHT
     for (int i = 0; i < source->size; i++) {
         pair_t* entry = source->entries[i];
-        if (!pht_insert(new_pht, entry)) {
-            pht_delete(new_pht);  // Free the new PHT if insertion fails
+        // Duplicate the pair (create a new pair with the same key and value)
+        pair_t* new_entry = pair_create(entry->key, entry->value);
+        if (!new_entry) {
+            pht_delete(new_pht);  // Memory allocation failed for new entry
+            return NULL;
+        }
+        // Insert the new entry into the new PHT
+        if (!pht_insert(new_pht, new_entry)) {
+            pht_delete(new_pht);
             return NULL; // Memory allocation for entries array failed
         }
     }
