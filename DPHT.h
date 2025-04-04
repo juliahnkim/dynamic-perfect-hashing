@@ -47,6 +47,7 @@ typedef struct DynamicPerfectHashTable {
     int capacity;
     int largestPH;
     hash_t hashFunction;
+    PHT* largestPHT;
     PHT** tables;
 } DPHT;
 
