@@ -108,11 +108,11 @@ void resize_dpht(DPHT* ht){
     free(ht->tables);
     ht->tables = (PHT**)malloc(sizeof(PHT*) * ht->capacity);
 	for(i=0; i<ht->capacity; i++){
-		ht->tables[i] = pht_create_from_array(tempArray[i], ht->largestPH);
+		ht->tables[i] = pht_create_from_array(tempArray[i], tempArray[i]->size);
 	}
 
 	for(i=0; i<ht->capacity; i++){
-		pht_delete(tempArray[i]);
+		free(tempArray[i]);
 	}
 	free(tempArray);
 	ht->largestPH=ht->tables[0]->size;
