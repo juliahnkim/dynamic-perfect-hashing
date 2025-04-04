@@ -47,7 +47,7 @@ int insert_dpht(DPHT* ht, char* key, char* value){
 	size_t index = _ht_index_find(ht, key);
 	int exists = pht_lookup(ht->tables[index], key);
 	if(exists==1){
-		return 0;
+		return dpht_update(ht, key, value);
 	}
 	pair_t* newPair=pair_create(key, value);
 	if(newPair==NULL){
@@ -70,6 +70,19 @@ int insert_dpht(DPHT* ht, char* key, char* value){
 	ht->size++;
 	return ret_val;
 	
+}
+
+int dpht_update(DPHT* ht, char* key, char* new_value) {
+	if(ht==NULL){
+		return 0;
+	}
+	size_t index = _ht_index_find(ht, key);
+	int exists = pht_lookup(ht->tables[index], key);
+	if(exists==0){
+		return 0;
+	}
+	return pht_update(ht->tables[index], key, new_value);
+
 }
 
 char* search_dpht(DPHT* ht, char* key){
