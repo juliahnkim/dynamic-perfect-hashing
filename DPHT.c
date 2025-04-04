@@ -83,7 +83,7 @@ int lookup_dpht(DPHT* ht, char* key){
 }
 
 void resize_dpht(DPHT* ht){
-	PHT** tempArray= (PHT**)malloc(sizeof(PHT*)*ht->capacity*3);
+	PHT** tempArray= (PHT**)malloc(sizeof(PHT*)*(ht->capacity)*3);
 	int i;
 	int j;
     for (i = 0; i < ht->capacity * 3; i++) {
@@ -103,7 +103,7 @@ void resize_dpht(DPHT* ht){
 		}
 	}
 	for(i=0; i<prev_cap; i++){
-		pht_delete(ht->tables[i]);
+		free(ht->tables[i]);
     }
     free(ht->tables);
     ht->tables = (PHT**)malloc(sizeof(PHT*) * ht->capacity);
