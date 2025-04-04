@@ -89,7 +89,7 @@ void resize_dpht(DPHT* ht){
     for (i = 0; i < ht->capacity * 3; i++) {
         tempArray[i] = pht_create(ht->largestPH);
     }
-	printf("Past first Loop");
+	printf("Past first Loop\n");
 	int prev_cap= ht->capacity;
 	ht->capacity=ht->capacity*3;
 	size_t index;
@@ -103,24 +103,24 @@ void resize_dpht(DPHT* ht){
 			tempArray[index]->size+=1;
 		}
 	}
-	printf("Passed nested loop");
+	printf("Passed nested loop\n");
 	for(i=0; i<prev_cap; i++){
 		free(ht->tables[i]);
     }
-	printf("Passed freeing ht tables");
+	printf("Passed freeing ht tables\n");
     free(ht->tables);
     ht->tables = (PHT**)malloc(sizeof(PHT*) * ht->capacity);
 	for(i=0; i<ht->capacity; i++){
 		ht->tables[i] = pht_create_from_array(tempArray[i], tempArray[i]->size);
 	}
-	printf("Passed create from array");
+	printf("Passed create from array\n");
 
 	for(i=0; i<ht->capacity; i++){
 		free(tempArray[i]);
 	}
-	printf("Passed free tempArray parts");
+	printf("Passed free tempArray parts\n");
 	free(tempArray);
-	printf("Passed free tempArray");
+	printf("Passed free tempArray \n");
 	ht->largestPH=ht->tables[0]->size;
 	for(i=0; i<ht->capacity; i++){
 		if(ht->tables[i]->size>ht->largestPH){
