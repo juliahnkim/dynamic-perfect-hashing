@@ -96,6 +96,20 @@ int unitTest5(int status) {
     return passed;
 }
 
+int unitTest6(int status) {
+    int passed = 0;
+    DPHT* test = create_dpht(12);
+    insert_dpht(test,"cow","A common farm animal.");
+    resize_dpht(test);
+    
+    if(lookup_dpht(test, "cow")==1) {
+      passed = 1;
+    }
+    
+    delete_table_dpht(test);
+    return passed;
+}
+
 // TODO: Add more tests here at your discretion
 int (*unitTests[])(int)={
     unitTest1,
@@ -103,6 +117,7 @@ int (*unitTests[])(int)={
     unitTest3,
     unitTest4,
     unitTest5,
+    unitTest6,
     NULL
 };
 
