@@ -45,6 +45,10 @@ int insert_dpht(DPHT* ht, char* key, char* value){
 		return 0;
 	}
 	size_t index = _ht_index_find(ht, key);
+	int exists = pht_lookup(ht->tables[index], key);
+	if(exists==1){
+		return 0;
+	}
 	pair_t* newPair=pair_create(key, value);
 	if(newPair==NULL){
 		return 0;
@@ -63,6 +67,7 @@ int insert_dpht(DPHT* ht, char* key, char* value){
 	if(ht->tables[index]->size > ht->largestPH){
         ht->largestPH = ht->tables[index]->size;
 	}
+	ht->size++;
 	return ret_val;
 	
 }
@@ -74,7 +79,11 @@ char* search_dpht(DPHT* ht, char* key){
 
 void delete_entry_dpht(DPHT* ht, char* key){
 	size_t index = _ht_index_find(ht, key);
+	int exists = pht_lookup(ht->tables[index], key);
     pht_delete_entry(ht->tables[index], key);
+	if(exists==1){
+		ht->size--;
+	}
 }
 
 int lookup_dpht(DPHT* ht, char* key){
@@ -89,7 +98,6 @@ void resize_dpht(DPHT* ht){
     for (i = 0; i < ht->capacity * 3; i++) {
         tempArray[i] = pht_create(ht->largestPH);
     }
-	printf("Past first Loop\n");
 	int prev_cap= ht->capacity;
 	ht->capacity=ht->capacity*3;
 	size_t index;
@@ -103,24 +111,19 @@ void resize_dpht(DPHT* ht){
 			tempArray[index]->size+=1;
 		}
 	}
-	printf("Passed nested loop\n");
 	for(i=0; i<prev_cap; i++){
 		free(ht->tables[i]);
     }
-	printf("Passed freeing ht tables\n");
     free(ht->tables);
     ht->tables = (PHT**)malloc(sizeof(PHT*) * ht->capacity);
 	for(i=0; i<ht->capacity; i++){
 		ht->tables[i] = pht_create_from_array(tempArray[i], tempArray[i]->size);
 	}
-	printf("Passed create from array\n");
 
 	for(i=0; i<ht->capacity; i++){
 		free(tempArray[i]);
 	}
-	printf("Passed free tempArray parts\n");
 	free(tempArray);
-	printf("Passed free tempArray \n");
 	ht->largestPH=ht->tables[0]->size;
 	for(i=0; i<ht->capacity; i++){
 		if(ht->tables[i]->size>ht->largestPH){
