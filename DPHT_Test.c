@@ -100,7 +100,7 @@ int unitTest6(int status) {
     int passed = 0;
     DPHT* test = create_dpht(12);
     insert_dpht(test,"cow","A common farm animal.");
-    test=resize_dpht(test);
+    resize_dpht(test);
     
     if(lookup_dpht(test, "cow")==1) {
       passed = 1;
