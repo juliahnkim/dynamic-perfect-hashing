@@ -258,7 +258,7 @@ void pht_delete(PHT* pht) {
 }
 
 PHT* pht_create_from_array(PHT* source, int new_capacity) {
-    if (!source || new_capacity <= source->size) {
+    if (!source || new_capacity < source->size) {
         return NULL; // Invalid parameters
     }
     // Create a new PHT with the specified capacity
