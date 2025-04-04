@@ -45,9 +45,7 @@ size_t _ht_index_find(DPHT* ht, void* key);
 typedef struct DynamicPerfectHashTable {
     int size;
     int capacity;
-    int largestPH;
     hash_t hashFunction;
-    PHT* largestPHT;
     PHT** tables;
 } DPHT;
 
