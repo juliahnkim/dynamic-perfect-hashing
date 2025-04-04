@@ -109,6 +109,15 @@ void resize_dpht(DPHT* ht);
 
 void delete_table_dpht(DPHT* ht);
 
+/** Function to delete a DPHT
+ *
+ * \param ht the pointer to the DPHT
+ * \param key the new key string
+ * \param new_value the new value string
+ */
+
+int dpht_update(DPHT* ht, char* key, char* new_value)
+
 /** Function to update a key-value pair in a DPHT
  *
  * \param ht the pointer to the DPHT
