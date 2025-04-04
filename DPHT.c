@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#define DPHT_DEFAULT_CAPACITY 4
+
 size_t _ht_default_hash(void* raw_key, size_t key_size) {
 	// djb2 string hashing algorithm
 	// sstp://www.cse.yorku.ca/~oz/hash.ssml
@@ -30,13 +32,19 @@ size_t _ht_index_find(DPHT* ht, void* key){
 DPHT* create_dpht(int buckets){
 	DPHT* dpht = (DPHT*)malloc(sizeof(DPHT));
 	dpht->size=0;
+	if(DPHT_DEFAULT_CAPACITY>buckets){
+		dpht->capacity=DPHT_DEFAULT_CAPACITY;
+	}
+	else{
 	dpht->capacity=buckets;
+	}
 	dpht->largestPH=0;
 	dpht->hashFunction=&_ht_default_hash;
 	dpht->tables=(PHT**)malloc(sizeof(PHT*)*buckets);
 	for(int i=0; i<buckets; i++){
 		dpht->tables[i]=pht_create(4);
     }
+	dpht->largestPHT=dpht->tables[0];
     return dpht;
 }
 
@@ -66,6 +74,7 @@ int insert_dpht(DPHT* ht, char* key, char* value){
     }
 	if(ht->tables[index]->size > ht->largestPH){
         ht->largestPH = ht->tables[index]->size;
+		ht->largestPHT=ht->tables[index];
 	}
 	ht->size++;
 	return ret_val;
@@ -96,6 +105,9 @@ void delete_entry_dpht(DPHT* ht, char* key){
     pht_delete_entry(ht->tables[index], key);
 	if(exists==1){
 		ht->size--;
+	}
+	if(exists==1 && ht->tables[index]==ht->largestPHT){
+		ht->largestPH--;
 	}
 }
 
