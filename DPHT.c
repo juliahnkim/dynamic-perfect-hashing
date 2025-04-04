@@ -38,13 +38,11 @@ DPHT* create_dpht(int buckets){
 	else{
 	dpht->capacity=buckets;
 	}
-	dpht->largestPH=0;
 	dpht->hashFunction=&_ht_default_hash;
 	dpht->tables=(PHT**)malloc(sizeof(PHT*)*buckets);
 	for(int i=0; i<buckets; i++){
 		dpht->tables[i]=pht_create(4);
     }
-	dpht->largestPHT=dpht->tables[0];
     return dpht;
 }
 
@@ -72,10 +70,6 @@ int insert_dpht(DPHT* ht, char* key, char* value){
         pair_free(newPair);
         return 0;
     }
-	if(ht->tables[index]->size > ht->largestPH){
-        ht->largestPH = ht->tables[index]->size;
-		ht->largestPHT=ht->tables[index];
-	}
 	ht->size++;
 	return ret_val;
 	
@@ -106,9 +100,6 @@ void delete_entry_dpht(DPHT* ht, char* key){
 	if(exists==1){
 		ht->size--;
 	}
-	if(exists==1 && ht->tables[index]==ht->largestPHT){
-		ht->largestPH--;
-	}
 }
 
 int lookup_dpht(DPHT* ht, char* key){
@@ -120,8 +111,15 @@ void resize_dpht(DPHT* ht){
 	PHT** tempArray= (PHT**)malloc(sizeof(PHT*)*(ht->capacity)*3);
 	int i;
 	int j;
+	int largestPH=ht->tables[0]->size;
+	for(i=0; i<ht->capacity; i++){
+		if(ht->tables[i]->size>largestPH){
+			largestPH=ht->tables[i]->size;
+		}
+	}
+		
     for (i = 0; i < ht->capacity * 3; i++) {
-        tempArray[i] = pht_create(ht->largestPH);
+        tempArray[i] = pht_create(largestPH);
     }
 	int prev_cap= ht->capacity;
 	ht->capacity=ht->capacity*3;
@@ -149,12 +147,6 @@ void resize_dpht(DPHT* ht){
 		free(tempArray[i]);
 	}
 	free(tempArray);
-	ht->largestPH=ht->tables[0]->size;
-	for(i=0; i<ht->capacity; i++){
-		if(ht->tables[i]->size>ht->largestPH){
-			ht->largestPH=ht->tables[i]->size;
-		}
-	}
 }
 
 void delete_table_dpht(DPHT* ht){
