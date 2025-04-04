@@ -118,8 +118,9 @@ void resize_dpht(DPHT* ht){
 	for(i=0; i<ht->capacity; i++){
 		free(tempArray[i]);
 	}
-	printf("Passed free tempArray");
+	printf("Passed free tempArray parts");
 	free(tempArray);
+	printf("Passed free tempArray");
 	ht->largestPH=ht->tables[0]->size;
 	for(i=0; i<ht->capacity; i++){
 		if(ht->tables[i]->size>ht->largestPH){
