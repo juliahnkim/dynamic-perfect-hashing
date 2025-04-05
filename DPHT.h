@@ -115,7 +115,7 @@ void delete_table_dpht(DPHT* ht);
  * \param new_value the new value string
  */
 
-int dpht_update(DPHT* ht, char* key, char* new_value)
+int dpht_update(DPHT* ht, char* key, char* new_value);
 
 /** Function to update a key-value pair in a DPHT
  *
