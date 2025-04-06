@@ -44,6 +44,7 @@ int main(void) {
         snprintf(value, sizeof(value), "value%d", i);
         start = get_time();
         int ret = insert_dpht(dpht, key, value);
+        printf("%d\n", i);
         end = get_time();
         assert(ret == 1);
         total_insert += (end - start);
