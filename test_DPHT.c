@@ -1,0 +1,175 @@
+/*
+ * Test program for PHT.c that performs the following:
+ * 1. Inserts NUM_KEYS key-value pairs into the PHT.
+ * 2. Looks up each key and verifies the value.
+ * 3. Updates each key's value and verifies the new value.
+ * 4. Deletes every second key and verifies that those keys are removed.
+ * 5. Creates a new PHT from the current one and verifies the keys.
+ * 6. Cleans up by deleting both PHTs.
+ */
+
+#include <stdio.h>      // For printf
+#include <stdlib.h>     // For malloc/free
+#include <string.h>     // For strcmp
+#include <assert.h>     // For assert
+#include <sys/time.h>   // For time functions
+#include "PHT.h"
+#include "pair.h"
+#include "DPHT.h"
+
+/* Helper function: Returns the current time in seconds */
+double get_time(void) {
+    struct timeval t;
+    gettimeofday(&t, NULL);
+    return t.tv_sec + t.tv_usec / 1000000.0;
+}
+
+#define NUM_KEYS 20 // Number of keys to test with
+
+int main(void) {
+    char key[64], value[64];
+    double start, end;
+    double total_insert = 0.0, total_lookup = 0.0, total_update = 0.0, total_delete = 0.0;
+    char* result;
+
+    // Create a new PHT with an initial capacity (e.g., 4).
+    DPHT* dpht = create_dpht(4);
+    assert(dpht != NULL);
+    assert(dpht->size == 0);
+
+    // 1. Insertion Test:
+    // Insert NUM_KEYS key-value pairs and verify that each is correctly inserted.
+    for (int i = 0; i < NUM_KEYS; i++) {
+        snprintf(key, sizeof(key), "key%d", i);
+        snprintf(value, sizeof(value), "value%d", i);
+        start = get_time();
+        int ret = insert_dpht(dpht, key, value);
+        end = get_time();
+        assert(ret == 1);
+        total_insert += (end - start);
+
+        // Immediately verify that the inserted key returns the correct value.
+        result = search_dpht(dpht, key);
+        assert(result != NULL);
+        // Compare result with expected value.
+        char expected[64];
+        snprintf(expected, sizeof(expected), "value%d", i);
+        assert(strcmp(result, expected) == 0);
+    }
+    printf("Insertion test passed: %d keys inserted, size = %d\n", NUM_KEYS, pht->size);
+    printf("Average insertion time: %f sec\n", total_insert / NUM_KEYS);
+
+    // 2. Lookup Test:
+    // Verify that every key in the table returns the expected value.
+    for (int i = 0; i < NUM_KEYS; i++) {
+        snprintf(key, sizeof(key), "key%d", i);
+        start = get_time();
+        result = search_dpht(dpht, key);
+        end = get_time();
+        assert(result != NULL);
+        char expected[64];
+        snprintf(expected, sizeof(expected), "value%d", i);
+        if (strcmp(result, expected) != 0) {
+            fprintf(stderr, "Lookup error for %s: expected %s, got %s\n", key, expected, result);
+        }
+        assert(strcmp(result, expected) == 0);
+        total_lookup += (end - start);
+    }
+    printf("Lookup test passed for all %d keys.\n", NUM_KEYS);
+    printf("Average lookup time: %f sec\n", total_lookup / NUM_KEYS);
+
+    // 3. Update Test:
+    // Update each key's value and verify the new value.
+    for (int i = 0; i < NUM_KEYS; i++) {
+        snprintf(key, sizeof(key), "key%d", i);
+        snprintf(value, sizeof(value), "new_value%d", i);
+        start = get_time();
+        int ret = dpht_update(dpht, key, value);
+        end = get_time();
+        assert(ret == 1);
+        total_update += (end - start);
+
+        result = search_dpht(dpht, key);
+        assert(result != NULL);
+        char expected[64];
+        snprintf(expected, sizeof(expected), "new_value%d", i);
+        if (strcmp(result, expected) != 0) {
+            fprintf(stderr, "Update error for %s: expected %s, got %s\n", key, expected, result);
+        }
+        assert(strcmp(result, expected) == 0);
+    }
+    printf("Update test passed for all %d keys.\n", NUM_KEYS);
+    printf("Average update time: %f sec\n", total_update / NUM_KEYS);
+
+    // 4. Deletion Test:
+    // Delete every second key and verify that those keys are removed.
+    for (int i = 0; i < NUM_KEYS; i += 2) {
+        snprintf(key, sizeof(key), "key%d", i);
+        start = get_time();
+        delete_entry_dpht(dpht, key);
+        end = get_time();
+        total_delete += (end - start);
+    }
+    printf("Deletion test passed: every second key deleted.\n");
+    printf("Average deletion time: %f sec\n", total_delete / (NUM_KEYS / 2));
+
+    // Verify deletions.
+    for (int i = 0; i < NUM_KEYS; i += 2) {
+        snprintf(key, sizeof(key), "key%d", i);
+        result = search_dpht(dpht, key);
+        assert(result == NULL);
+    }
+    // Verify that keys not deleted still return correct updated values.
+    for (int i = 1; i < NUM_KEYS; i += 2) {
+        snprintf(key, sizeof(key), "key%d", i);
+        result = search_dpht(dpht, key);
+        assert(result != NULL);
+        char expected[64];
+        snprintf(expected, sizeof(expected), "new_value%d", i);
+        assert(strcmp(result, expected) == 0);
+    }
+    printf("Verification after deletion passed.\n");
+
+    // 5. Resizing test:
+    // Test Resizing functionality
+    DPHT* dpht2 = create_dpht(4);
+    assert(dpht2 != NULL);
+    assert(dpht2->size == 0);
+  for (int i = 0; i < 401; i++) {
+        snprintf(key, sizeof(key), "key%d", i);
+        snprintf(value, sizeof(value), "value%d", i);
+        start = get_time();
+        int ret = insert_dpht(dpht2, key, value);
+        end = get_time();
+        assert(ret == 1);
+        total_insert += (end - start);
+
+        // Immediately verify that the inserted key returns the correct value.
+        result = search_dpht(dpht2, key);
+        assert(result != NULL);
+        // Compare result with expected value.
+        char expected[64];
+        snprintf(expected, sizeof(expected), "value%d", i);
+        assert(strcmp(result, expected) == 0);
+    }
+  for (int i = 0; i < 401; i++) {
+        snprintf(key, sizeof(key), "key%d", i);
+        //verify that the inserted key returns the correct value after resizing.
+        result = search_dpht(dpht2, key);
+        assert(result != NULL);
+        // Compare result with expected value.
+        char expected[64];
+        snprintf(expected, sizeof(expected), "value%d", i);
+        assert(strcmp(result, expected) == 0);
+    }
+  assert(dpht2->capacity==12);
+  
+    printf("Resizing test passed.\n");
+
+    // Clean up: Delete both PHTs.
+    delete_table_dpht(dpht2);
+    delete_table_dpht(dpht);
+
+    printf("All DPHT tests passed successfully.\n");
+    return 0;
+}
