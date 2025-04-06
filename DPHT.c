@@ -60,7 +60,7 @@ int insert_dpht(DPHT* ht, char* key, char* value){
 		return 0;
 	}
 
-	if(ht->size+1>ht->capacity*100){
+	if((ht->size+1)>((ht->capacity)*100)){
 		resize_dpht(ht);
 	}
 	int ret_val;
