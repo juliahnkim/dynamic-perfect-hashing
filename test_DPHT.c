@@ -4,7 +4,7 @@
  * 2. Looks up each key and verifies the value.
  * 3. Updates each key's value and verifies the new value.
  * 4. Deletes every second key and verifies that those keys are removed.
- * 5. Creates a new PHT from the current one and verifies the keys.
+ * 5. Creates a new DPHT and checks that resizing is working properly.
  * 6. Cleans up by deleting both PHTs.
  */
 
