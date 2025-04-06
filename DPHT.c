@@ -62,6 +62,7 @@ int insert_dpht(DPHT* ht, char* key, char* value){
 
 	if((ht->size+1)>((ht->capacity)*100)){
 		resize_dpht(ht);
+		index = _ht_index_find(ht, key);
 	}
 	int ret_val;
     ret_val = pht_insert(ht->tables[index], newPair);
