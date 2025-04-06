@@ -56,7 +56,7 @@ int main(void) {
         snprintf(expected, sizeof(expected), "value%d", i);
         assert(strcmp(result, expected) == 0);
     }
-    printf("Insertion test passed: %d keys inserted, size = %d\n", NUM_KEYS, pht->size);
+    printf("Insertion test passed: %d keys inserted, size = %d\n", NUM_KEYS, dpht->size);
     printf("Average insertion time: %f sec\n", total_insert / NUM_KEYS);
 
     // 2. Lookup Test:
@@ -166,7 +166,7 @@ int main(void) {
   
     printf("Resizing test passed.\n");
 
-    // Clean up: Delete both PHTs.
+    // Clean up: Delete both DPHTs.
     delete_table_dpht(dpht2);
     delete_table_dpht(dpht);
 
