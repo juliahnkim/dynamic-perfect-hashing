@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#define DPHT_DEFAULT_CAPACITY 4
+#define DPHT_DEFAULT_CAPACITY 10
 
 size_t _ht_default_hash(void* raw_key, size_t key_size) {
 	// djb2 string hashing algorithm
