@@ -71,8 +71,9 @@ static void dpht_rehash(DPHT* dpht) {
 
     // Allocate new tables array
     PHT** newTables = malloc(sizeof(PHT*) * newCapacity);
-    if (!newTables)
+    if (!newTables) {
         return; // Leave DPHT unchanged on allocation failure
+    }
 
     // Initialize each new PHT
     for (int i = 0; i < newCapacity; i++) {

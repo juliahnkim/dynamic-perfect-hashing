@@ -5,7 +5,7 @@
 #include "DPHT.h"
 
 /**
- * Example main program simulating a network device's flow table using a DPHT.
+ * Simulating a network device's flow table using a DPHT.
  *
  * In network processing, a flow is a group of packets that share common header fields.
  * The flow table stores a flow entry for each flow, where:
@@ -18,7 +18,7 @@
  *
  * This program:
  *   1. Creates a DPHT to simulate a flow table.
- *   2. Inserts many flow entries (each representing a flow) into the DPHT.
+ *   2. Inserts 10000 flow entries (each representing a flow) into the DPHT.
  *   3. Looks up flows to simulate the per-packet matching process.
  *   4. Updates certain flow entries to reflect dynamic network changes.
  *   5. Deletes selected flow entries, simulating flow expiry or re-routing.
@@ -28,7 +28,7 @@
  */
 int main(void) {
     const int NUM_FLOW_ENTRIES = 10000;  // Number of distinct flow entries to simulate
-    clock_t start, end;
+    clock_t start, end; // CPU use time tracking
     double cpu_time_used;
 
     // 1. Create a DPHT to simulate the flow table.
