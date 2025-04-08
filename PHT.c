@@ -8,7 +8,7 @@
 
 /** Rebuilds the MPH for the current set of keys in the PHT, using CMPH.
  *
- * This function is reorders the entries array so that cmph_search() returns
+ * This function reorders the entries array so that cmph_search() returns
  * the correct index for each key.
  *
  * \param pht Pointer to the PHT whose MPH needs to be rebuilt.
