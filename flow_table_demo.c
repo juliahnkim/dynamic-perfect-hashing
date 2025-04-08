@@ -9,14 +9,14 @@
  *
  * In network processing, a flow is a group of packets that share common header fields.
  * The flow table stores a flow entry for each flow, where:
- *    - The **flow key** (e.g., "flow_1234") is derived from the packet headers.
- *    - The **flow value** (e.g., "next_hop_1234") contains metadata such as the processing
+ *    - The flow identifier (key) (e.g., "flow_1234") is derived from the packet headers.
+ *    - The value (e.g., "next_hop_1234") contains metadata such as the processing
  *      action or next-hop information.
  *
  * The flow table (implemented via a Dynamic Perfect Hash Table) does not store the actual packets;
  * it stores only the metadata required to quickly decide how to process each arriving packet.
  *
- * This program:
+ * This program performs the following:
  *   1. Creates a DPHT to simulate a flow table.
  *   2. Inserts 10000 flow entries (each representing a flow) into the DPHT.
  *   3. Looks up flows to simulate the per-packet matching process.
