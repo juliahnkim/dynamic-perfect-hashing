@@ -74,6 +74,7 @@ static void pht_rebuild(PHT* pht) {
     for (int i = 0; i < pht->size; i++) {
         pair_t* entry = pht->entries[i];
         unsigned int hash = cmph_search(mph, entry->key, (cmph_uint32)strlen(entry->key));
+        hash = hash % pht->size;
         new_entries[hash] = entry;
     }
 
@@ -112,9 +113,8 @@ PHT* pht_create(int initial_capacity) {
     for (int i = 0; i < initial_capacity; i++) {
         pht->entries[i] = NULL;
     }
-    
-    pht->mph = NULL; // Initialize the MPH to NULL
 
+    pht->mph = NULL; // Initialize the MPH to NULL
     return pht;
 }
 
@@ -141,7 +141,6 @@ static int pht_resize(PHT* pht, int new_capacity) {
 
     pht->entries = new_entries;
     pht->capacity = new_capacity;
-
     return 1; // Success
 }
 
@@ -160,9 +159,8 @@ int pht_insert(PHT* pht, pair_t* new_pair) {
     pht->entries[pht->size] = new_pair;
     pht->size++;
 
-    // Rebuild the MPH and reorder the entries based on the new MPH
-    pht_rebuild(pht);
-
+    // Invalidate the MPH to force a rebuild on next operation
+    pht->mph = NULL;
     return 1;
 }
 
@@ -173,20 +171,32 @@ char* pht_search(PHT* pht, const char* key) {
 
     // If there's only one element, return its value if the key matches.
     if (pht->size == 1) {
-        return pht->entries[0]->value;
+        if (strcmp(pht->entries[0]->key, key) == 0) {
+            return pht->entries[0]->value;
+        }
+        else {
+            return NULL;
+        }
     }
 
+    // Lazy rebuild: if the MPH is not built, build it now
     if (!pht->mph) {
-        return NULL; // No MPH available
+        pht_rebuild(pht);
+    }
+    if (!pht->mph) {
+        return NULL; // Memory allocation failed for MPH
     }
 
     unsigned int hash = cmph_search(pht->mph, key, (cmph_uint32)strlen(key));
+    hash = hash % pht->size; // Ensure the hash is within the bounds of the entries array
     pair_t* entry = pht->entries[hash];
 
+    // If the entry exists and the key matches, return its value
+    // Otherwise, return NULL
     if (entry && strcmp(entry->key, key) == 0) {
-        return entry->value; // Key found
+        return entry->value;
     }
-    return NULL; // Key not found
+    return NULL;
 }
 
 int pht_lookup(PHT* pht, const char* key) {
@@ -194,8 +204,22 @@ int pht_lookup(PHT* pht, const char* key) {
 }
 
 int pht_update(PHT* pht, const char* key, const char* new_value) {
-    if (!pht || !key || !new_value || pht->size == 0 || !pht->mph) {
+    if (!pht || !key || !new_value || pht->size == 0) {
         return 0; // Invalid parameters
+    }
+    if (pht->size == 1) { // Check that the key matches
+        if (strcmp(pht->entries[0]->key, key) == 0) {
+            return pair_update_value(pht->entries[0], new_value);
+        }
+        return 0;
+    }
+
+    // Lazy rebuild if needed
+    if (!pht->mph) {
+        pht_rebuild(pht);
+    }
+    if (!pht->mph) {
+        return 0; // Memory allocation failed for MPH
     }
 
     unsigned int hash = cmph_search(pht->mph, key, (cmph_uint32)strlen(key));
@@ -207,10 +231,11 @@ int pht_update(PHT* pht, const char* key, const char* new_value) {
     return 0; // Key not found
 }
 
-void pht_delete_entry(PHT* pht, const char* key) {
+void pht_remove_entry(PHT* pht, const char* key) {
     if (!pht || !key || pht->size == 0) {
         return; // Invalid parameters
     }
+
     // If there's only one element, delete the only entry and free the MPH
     if (pht->size == 1) {
         if (strcmp(pht->entries[0]->key, key) == 0) {
@@ -224,10 +249,16 @@ void pht_delete_entry(PHT* pht, const char* key) {
         }
         return;
     }
+
     // For 2 or more elements, use the MPH to find the key
-    if (!pht->mph) {
-        return; // No MPH available
+    // Lazy rebuild if needed
+    if (pht->mph == NULL) {
+        pht_rebuild(pht);
     }
+    if (!pht->mph) {
+        return; // Memory allocation failed for MPH
+    }
+
     unsigned int hash = cmph_search(pht->mph, key, (cmph_uint32)strlen(key));
     pair_t* entry = pht->entries[hash];
     if (entry && strcmp(entry->key, key) == 0) {
@@ -236,7 +267,7 @@ void pht_delete_entry(PHT* pht, const char* key) {
         // because all entries are stored in a contiguous array
         pht->entries[hash] = pht->entries[pht->size - 1];
         pht->size--;
-        pht_rebuild(pht);   // Rebuild the MPH after deletion
+        pht->mph = NULL; // Invalidate the MPH to force a rebuild on next operation
     }
 }
 

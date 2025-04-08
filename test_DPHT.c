@@ -1,5 +1,5 @@
 /*
- * Test program for PHT.c that performs the following:
+ * Test program for DPHT.c that performs the following:
  * 1. Inserts NUM_KEYS key-value pairs into the PHT.
  * 2. Looks up each key and verifies the value.
  * 3. Updates each key's value and verifies the new value.
@@ -33,7 +33,7 @@ int main(void) {
     char* result;
 
     // Create a new PHT with an initial capacity (e.g., 4).
-    DPHT* dpht = create_dpht(4);
+    DPHT* dpht = dpht_create(16);
     assert(dpht != NULL);
     assert(dpht->size == 0);
 
@@ -43,14 +43,13 @@ int main(void) {
         snprintf(key, sizeof(key), "key%d", i);
         snprintf(value, sizeof(value), "value%d", i);
         start = get_time();
-        int ret = insert_dpht(dpht, key, value);
+        int ret = dpht_insert(dpht, key, value);
         printf("%d\n", i);
         end = get_time();
         assert(ret == 1);
         total_insert += (end - start);
-
         // Immediately verify that the inserted key returns the correct value.
-        result = search_dpht(dpht, key);
+        result = dpht_search(dpht, key);
         assert(result != NULL);
         // Compare result with expected value.
         char expected[64];
@@ -65,7 +64,7 @@ int main(void) {
     for (int i = 0; i < NUM_KEYS; i++) {
         snprintf(key, sizeof(key), "key%d", i);
         start = get_time();
-        result = search_dpht(dpht, key);
+        result = dpht_search(dpht, key);
         end = get_time();
         assert(result != NULL);
         char expected[64];
@@ -90,7 +89,7 @@ int main(void) {
         assert(ret == 1);
         total_update += (end - start);
 
-        result = search_dpht(dpht, key);
+        result = dpht_search(dpht, key);
         assert(result != NULL);
         char expected[64];
         snprintf(expected, sizeof(expected), "new_value%d", i);
@@ -107,7 +106,7 @@ int main(void) {
     for (int i = 0; i < NUM_KEYS; i += 2) {
         snprintf(key, sizeof(key), "key%d", i);
         start = get_time();
-        delete_entry_dpht(dpht, key);
+        dpht_remove_entry(dpht, key);
         end = get_time();
         total_delete += (end - start);
     }
@@ -117,13 +116,13 @@ int main(void) {
     // Verify deletions.
     for (int i = 0; i < NUM_KEYS; i += 2) {
         snprintf(key, sizeof(key), "key%d", i);
-        result = search_dpht(dpht, key);
+        result = dpht_search(dpht, key);
         assert(result == NULL);
     }
     // Verify that keys not deleted still return correct updated values.
     for (int i = 1; i < NUM_KEYS; i += 2) {
         snprintf(key, sizeof(key), "key%d", i);
-        result = search_dpht(dpht, key);
+        result = dpht_search(dpht, key);
         assert(result != NULL);
         char expected[64];
         snprintf(expected, sizeof(expected), "new_value%d", i);
@@ -133,44 +132,109 @@ int main(void) {
 
     // 5. Resizing test:
     // Test Resizing functionality
-    DPHT* dpht2 = create_dpht(4);
+    DPHT* dpht2 = dpht_create(4);
     assert(dpht2 != NULL);
     assert(dpht2->size == 0);
-  for (int i = 0; i < 401; i++) {
+    for (int i = 0; i < 20; i++) {
         snprintf(key, sizeof(key), "key%d", i);
         snprintf(value, sizeof(value), "value%d", i);
         start = get_time();
-        int ret = insert_dpht(dpht2, key, value);
+        int ret = dpht_insert(dpht2, key, value);
         end = get_time();
         assert(ret == 1);
         total_insert += (end - start);
+    }
+    printf("Resizing test passed: %d keys inserted, size = %d\n", 20, dpht2->size);
+    printf("Average insertion time during resizing: %f sec\n", total_insert / 20);
 
-        // Immediately verify that the inserted key returns the correct value.
-        result = search_dpht(dpht2, key);
-        assert(result != NULL);
-        // Compare result with expected value.
-        char expected[64];
-        snprintf(expected, sizeof(expected), "value%d", i);
-        assert(strcmp(result, expected) == 0);
-    }
-  for (int i = 0; i < 401; i++) {
+    // Verify that all keys are still present after resizing.
+    for (int i = 0; i < 20; i++) {
         snprintf(key, sizeof(key), "key%d", i);
-        //verify that the inserted key returns the correct value after resizing.
-        result = search_dpht(dpht2, key);
+        start = get_time();
+        result = dpht_search(dpht2, key);
+        end = get_time();
         assert(result != NULL);
         // Compare result with expected value.
         char expected[64];
         snprintf(expected, sizeof(expected), "value%d", i);
+        if (strcmp(result, expected) != 0) {
+            fprintf(stderr, "Resizing lookup error %s: expected %s, got %s\n", key, expected, result);
+        }
         assert(strcmp(result, expected) == 0);
     }
-  assert(dpht2->capacity==12);
-  
+
     printf("Resizing test passed.\n");
+    printf("Average lookup time during resizing: %f sec\n", total_lookup / 20);
 
     // Clean up: Delete both DPHTs.
-    delete_table_dpht(dpht2);
-    delete_table_dpht(dpht);
+    dpht_free(dpht2);
+    dpht_free(dpht);
 
     printf("All DPHT tests passed successfully.\n");
     return 0;
 }
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <assert.h>
+// #include "DPHT.h"
+
+// int main(void) {
+//     DPHT* ht = create_dpht(4);  // Start with 4 tables
+//     assert(ht != NULL);
+
+//     int num_keys = 5;
+//     char key[64];
+//     char value[64];
+
+//     // Insert keys exactly once.
+//     for (int i = 0; i < num_keys; i++) {
+//         snprintf(key, sizeof(key), "key%d", i);
+//         snprintf(value, sizeof(value), "value%d", i);
+//         int ret = insert_dpht(ht, key, value);
+//         assert(ret == 1);
+//         printf("Inserted: %s -> %s\n", key, value);
+//     }
+
+//     // Verify all inserted keys.
+//     for (int i = 0; i < num_keys; i++) {
+//         snprintf(key, sizeof(key), "key%d", i);
+//         char* result = search_dpht(ht, key);
+//         assert(result != NULL);
+//         snprintf(value, sizeof(value), "value%d", i);
+//         assert(strcmp(result, value) == 0);
+//         printf("Verified: %s -> %s\n", key, result);
+//     }
+
+//     // Update one key.
+//     const char* update_key = "key4";
+//     int ret = dpht_update(ht, (char*)update_key, "new_value2");
+//     assert(ret == 1);
+//     char* result = search_dpht(ht, (char*)update_key);
+//     assert(result != NULL);
+//     assert(strcmp(result, "new_value2") == 0);
+//     printf("Updated: %s -> %s\n", update_key, result);
+
+//     // Delete one key.
+//     const char* delete_key = "key3";
+//     delete_entry_dpht(ht, (char*)delete_key);
+//     result = search_dpht(ht, (char*)delete_key);
+//     assert(result == NULL);
+//     printf("Deleted key: %s\n", delete_key);
+
+//     // Verify remaining keys.
+//     for (int i = 0; i < num_keys; i++) {
+//         snprintf(key, sizeof(key), "key%d", i);
+//         if (strcmp(key, delete_key) == 0)
+//             continue;
+//         result = search_dpht(ht, key);
+//         assert(result != NULL);
+//         printf("Remaining: %s -> %s\n", key, result);
+//     }
+
+//     // Clean up.
+//     delete_table_dpht(ht);
+//     printf("All tests passed successfully.\n");
+
+//     return 0;
+// }

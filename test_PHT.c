@@ -105,7 +105,7 @@ int main(void) {
     for (int i = 0; i < NUM_KEYS; i += 2) {
         snprintf(key, sizeof(key), "key%d", i);
         start = get_time();
-        pht_delete_entry(pht, key);
+        pht_remove_entry(pht, key);
         end = get_time();
         total_delete += (end - start);
     }

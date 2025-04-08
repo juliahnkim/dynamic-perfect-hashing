@@ -22,8 +22,9 @@ typedef struct PerfectHashTable {
 
 /** Creates a new perfect hash table (PHT) with the given initial capacity.
  *
- * The PHT is initialized with an empty set of key-value pairs.
-
+ * This function allocates memory for a PHT structure and initializes its
+ * internal array of key-value pairs to be empty. The MPH function is initially NULL.
+ *
  * \param initial_capacity The initial capacity of the PHT.
  * \returns A pointer to the newly created PHT, or NULL on failure.
  */
@@ -31,7 +32,9 @@ PHT* pht_create(int initial_capacity);
 
 /** Inserts a new key-value pair into the perfect hash table.
  *
- * After insertion, the MPH is rebuilt to accommodate the new key.
+ * This function appends a new key-value pair to the internal array.
+ * If the capacity is exceeded, the array is resized. The MPH is invalidated
+ * and will be rebuilt lazily on the next search or update operation.
  *
  * \param pht Pointer to the PHT where the key-value pair will be inserted.
  * \param new_pair Pointer to the key-value pair to be inserted.
@@ -50,6 +53,9 @@ int pht_update(PHT* pht, const char* key, const char* new_value);
 
 /** Searches for a given key in the PHT.
  *
+ * This function locates the value associated with a given key using the MPH.
+ * If the MPH has not yet been built or is outdated, it will be rebuilt automatically.
+ *
  * \param pht Pointer to the PHT where the key will be searched.
  * \param key The key string to search for.
  * \returns Pointer to the value associated with the key if found, NULL otherwise.
@@ -64,18 +70,20 @@ char* pht_search(PHT* pht, const char* key);
  */
 int pht_lookup(PHT* pht, const char* key);
 
-/** Deletes a key-value pair corresponding to the given key from the PHT.
+/** Deletes a key-value pair from the PHT based on its key.
  *
- * Frees memory from the deleted pair, removes it from the PHT, and
- * rebuilds the MPH.
+ * This function frees the memory of the deleted pair, updates the internal array,
+ * and invalidates the MPH so it is rebuilt on the next access.
  *
  * \param pht Pointer to the PHT where the key-value pair will be deleted.
  * \param key The key string of the pair to be deleted.
  */
-void pht_delete_entry(PHT* pht, const char* key);
+void pht_remove_entry(PHT* pht, const char* key);
 
-/** Destroys the PHT by freeing all allocated memory, including the MPH, the
- * entries array, and the key-value pairs.
+/** Frees all memory associated with a perfect hash table.
+ *
+ * This function deletes all key-value pairs, destroys the MPH (if present),
+ * and frees the table structure itself.
  *
  * \param pht Pointer to the PHT to be destroyed.
  */

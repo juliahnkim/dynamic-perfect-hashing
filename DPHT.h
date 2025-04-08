@@ -6,125 +6,95 @@
 #include "PHT.h"
 #include "pair.h"
 
-typedef struct DynamicPerfectHashTable DPHT;
-
-/** Typedef for the hashfunction pointer
-* this allows the function to be more easily called later
- */
-
-typedef size_t (*hash_t)(void*, size_t);
-
-/** Hash function for the upper level of the DPHT
+/** Structure for the dynamic perfect hash table (DPHT).
  *
- * This function generates a hash value from the key passed to it.
- * \param raw_key The string being hashed
- * \param key_size The length of the string
- * \returns The hash value in a size_t
- */
-
-size_t _ht_default_hash(void* raw_key, size_t key_size);
-
-/** Function to get the index of a key
- *
- * This function generates a index from the key passed to it.
- * \param ht the pointer to the hashtable
- * \param key the string that is the key
- * \returns the index in a size_t
- */
-
-size_t _ht_index_find(DPHT* ht, void* key);
-
-/** Struct of the DPHT
- *
- * \param size the integer representing the number of elements in the table
- * \param capacity the size of the PHT* array
- * \param largestPH the integer size of the largest PHT table
- * \param hashFunction the pointer to the hash function in use
+ * \param size The total number of key-value pairs stored in the DPHT.
+ * \param capacity The number of PHT tables in the DPHT.
  * \param tables the array of PHT pointers
  */
 typedef struct DynamicPerfectHashTable {
     int size;
     int capacity;
-    hash_t hashFunction;
     PHT** tables;
 } DPHT;
 
-/** Function to create a DPHT
+/** Creates a new Dynamic Perfect Hash Table (DPHT).
  *
- * This function creates a DPHT
- * \param buckets the size of the array to be created
- * \returns the pointer to the DPHT created by the function
+ * This function allocates and initializes a DPHT structure consisting of
+ * an array of smaller PHT (Perfect Hash Table) buckets.
+ *
+ * \param initialTables The number of PHT buckets to initialize.
+ *                      If less than 1, a default value is used.
+ * \returns A pointer to the newly created DPHT, or NULL if memory allocation fails.
  */
 
-DPHT* create_dpht(int buckets);
+DPHT* dpht_create(int initialTables);
 
-/** Function to insert a key-value pair into a DPHT
+/** Inserts a key-value pair into the DPHT.
  *
- * \param ht the pointer to the DPHT
- * \param key The string that is the key
- * \param value The key that is the value
- * \returns an integer indicating success or failure
- */
-
-int insert_dpht(DPHT* ht, char* key, char* value);
-
-/** Function to search for the value associated with a key
+ * This function hashes the key to determine the appropriate PHT bucket,
+ * and inserts the new pair into that bucket. If the key already exists,
+ * the existing value is updated instead. The DPHT may trigger a rehash
+ * if the load factor exceeds the predefined threshold.
  *
- * \param ht the pointer to the DPHT
- * \param key The string that is the key
- * \returns a string that is the value associated with the key
+ * \param dpht Pointer to the DPHT structure.
+ * \param key Pointer to the key string.
+ * \param value Pointer to the value string.
+ * \returns 1 on success, 0 on failure (e.g., memory allocation error).
  */
+int dpht_insert(DPHT* dpht, char* key, char* value);
 
-char* search_dpht(DPHT* ht, char* key);
-
-/** Function to delete a key-value pair from a DPHT
+/** Searches for a key in the DPHT.
  *
- * \param ht the pointer to the DPHT
- * \param key The string that is the key
- */
-
-void delete_entry_dpht(DPHT* ht, char* key);
-
-/** Function to check if a key is in the table
+ * This function computes the hash of the given key to locate the appropriate
+ * PHT bucket, and then performs a lookup within that bucket.
  *
- * \param ht the pointer to the DPHT
- * \param key The string that is the key
- * \returns an int representing if the key is present
+ * \param dpht Pointer to the DPHT structure.
+ * \param key Pointer to the key string to search for.
+ * \returns The associated value if the key is found, or NULL otherwise.
  */
+char* dpht_search(DPHT* dpht, char* key);
 
-int lookup_dpht(DPHT* ht, char* key);
-
-/** Function to resize a DPHT
+/** Updates the value associated with an existing key in the DPHT.
  *
- * \param ht the pointer to the DPHT
- */
-
-void resize_dpht(DPHT* ht);
-
-/** Function to delete a DPHT
+ * This function hashes the key to find its corresponding PHT bucket
+ * and updates the value if the key is present.
  *
- * \param ht the pointer to the DPHT
+ * \param dpht Pointer to the DPHT structure.
+ * \param key Pointer to the key string to update.
+ * \param new_value Pointer to the new value string.
+ * \returns 1 if the key was found and updated, 0 otherwise.
  */
+int dpht_update(DPHT* dpht, char* key, char* new_value);
 
-void delete_table_dpht(DPHT* ht);
-
-/** Function to delete a DPHT
+/** Checks if a given key exists in the DPHT.
  *
- * \param ht the pointer to the DPHT
- * \param key the new key string
- * \param new_value the new value string
- */
-
-int dpht_update(DPHT* ht, char* key, char* new_value);
-
-/** Function to update a key-value pair in a DPHT
+ * This function performs a lookup for the key and returns whether it exists.
  *
- * \param ht the pointer to the DPHT
- * \param key The string that is the key
- * \param value The key that is the value
- * \returns an integer indicating success or failure
+ * \param dpht Pointer to the DPHT structure.
+ * \param key Pointer to the key string to check.
+ * \returns 1 if the key is found, 0 otherwise.
  */
+int dpht_lookup(DPHT* dpht, char* key);
 
-int update_dpht(DPHT* ht, char* key, char* value);
+/** Deletes a key-value pair from the DPHT if the key exists.
+ *
+ * This function hashes the key to find the appropriate PHT bucket,
+ * and removes the corresponding entry. The total size of the DPHT
+ * is decremented if the deletion is successful.
+ *
+ * \param dpht Pointer to the DPHT structure.
+ * \param key Pointer to the key string to delete.
+ */
+void dpht_remove_entry(DPHT* dpht, char* key);
+
+/** Deletes the entire DPHT and frees all associated memory.
+ *
+ * This function deallocates each internal PHT bucket and
+ * then releases the DPHT structure itself.
+ *
+ * \param dpht Pointer to the DPHT structure to delete.
+ */
+void dpht_free(DPHT* dpht);
 
 #endif // DPHT_H
